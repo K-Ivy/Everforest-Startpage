@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start</title>
+<style>
+:root {
+  --bg-main: #272e33;
+  --bg-surface: #2d353b;
+  --bg-dark: #242b2f;
+  --border: #3d484d;
+  --text: #d3c6aa;
+  --text-muted: #9da9a0;
+  --accent: #a7c080;
+  --accent-text: #1e2a23;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-main);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wrap {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  animation: fadeIn 0.5s ease;
+}
+
+.date-container {
+  text-align: center;
+  user-select: none;
+}
+
+.date {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.date-numeric {
+  font-size: 14px;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.search-input {
+  width: 100%;
+  padding: 18px 60px 18px 24px;
+  font-size: 16px;
+  background: var(--bg-surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: inherit;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-dark);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.engine-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: -16px;
+  user-select: none;
+}
+
+.btn-toggle {
+  background: var(--bg-surface);
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-toggle:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.btn-toggle.active {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+.shortcuts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.shortcut {
+  background: var(--bg-surface);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shortcut:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  background: var(--bg-dark);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.shortcut:hover .shortcut-icon {
+  color: var(--accent);
+}
+
+.shortcut-icon {
+  font-size: 24px;
+  transition: color 0.2s ease;
+}
+
+.shortcut-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.6;
+  margin-top: 24px;
+  user-select: none;
+}
+
+kbd {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.settings-btn {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: auto;
+  height: auto;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.settings-btn:hover {
+  color: var(--accent);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: auto;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+.field {
+  margin-bottom: 14px;
+}
+
+.field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.field input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--bg-dark);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.field input::placeholder {
+  color: var(--text-muted);
+}
+
+.btn {
+  background: var(--accent);
+  color: var(--accent-text);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  filter: brightness(1.05);
+}
+
+.btn-secondary {
+  background: var(--bg-surface);
+  border: 2px solid var(--border);
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  filter: none;
+  border-color: var(--accent);
+}
+
+.shortcut-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-dark);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+}
+
+.shortcut-item:hover {
+  border-color: var(--accent);
+}
+
+.shortcut-item:hover .shortcut-item-icon {
+  color: var(--accent);
+}
+
+.shortcut-item-icon {
+  font-size: 20px;
+  width: 28px;
+  text-align: center;
+  transition: color 0.2s ease;
+}
+
+.shortcut-item-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.shortcut-item-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-icon-small {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
+}
+
+.btn-icon-small:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-icon-small.delete:hover {
+  border-color: #e67e80;
+  color: #e67e80;
+}
+
+.context-menu {
+  position: fixed;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  min-width: 180px;
+  display: none;
+}
+
+.context-menu.show {
+  display: block;
+}
+
+.context-menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  transition: background 0.15s ease;
+}
+
+.context-menu-item:hover {
+  background: var(--bg-dark);
+}
+
+.context-menu-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.context-menu-item.disabled:hover {
+  background: transparent;
+}
+
+.context-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+@media (max-width: 600px) {
+  .shortcuts {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+  
+  .shortcut {
+    padding: 12px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="date-container">
+    <div class="date" id="date">Loading...</div>
+    <div class="date-numeric" id="dateNumeric">Loading...</div>
+  </div>
+
+  <form id="searchForm" style="position: relative;">
+    <input 
+      type="text" 
+      class="search-input" 
+      id="searchInput"
+      placeholder="Search or enter URL..."
+      autocomplete="off"
+      spellcheck="false"
+    >
+    <button type="button" class="settings-btn" id="settingsBtn" title="Manage Shortcuts">⚙</button>
+  </form>
+  
+  <div class="engine-toggle">
+    <button type="button" class="btn-toggle" data-engine="google">Google</button>
+    <button type="button" class="btn-toggle active" data-engine="duckduckgo">DuckDuckGo</button>
+    <button type="button" class="btn-toggle" data-engine="github">GitHub</button>
+  </div>
+  
+  <div class="shortcuts" id="shortcuts"></div>
+  
+  <div class="hint">Press <kbd>/</kbd> to focus search • <kbd>Esc</kbd> to clear</div>
+</div>
+
+<div class="modal" id="settingsModal">
+  <div class="modal-content">
+    <div class="modal-title">Manage Shortcuts</div>
+    
+    <div class="shortcut-list" id="shortcutList"></div>
+    
+    <div style="display: flex; gap: 8px; justify-content: center;">
+      <button class="btn" id="addShortcutBtn">+ Add Shortcut</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="editShortcutModal">
+  <div class="modal-content">
+    <div class="modal-title" id="editModalTitle">Add Shortcut</div>
+    
+    <div class="field">
+      <label>Icon (Emoji)</label>
+      <input type="text" id="editIcon" placeholder="e.g., 🚀" maxlength="2">
+    </div>
+    
+    <div class="field">
+      <label>Label</label>
+      <input type="text" id="editLabel" placeholder="e.g., GitHub">
+    </div>
+    
+    <div class="field">
+      <label>URL</label>
+      <input type="text" id="editUrl" placeholder="e.g., https://github.com">
+    </div>
+    
+    <div style="display: flex; gap: 8px; justify-content: center;">
+      <button class="btn" id="saveShortcutBtn">Save</button>
+      <button class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="context-menu" id="contextMenu">
+  <div class="context-menu-item" id="contextOpen">Open</div>
+  <div class="context-menu-item" id="contextNewTab">Open in New Tab</div>
+  <div class="context-menu-divider"></div>
+  <div class="context-menu-item" id="contextCopyLink">Copy Link</div>
+</div>
+
+<div class="context-menu" id="searchContextMenu">
+  <div class="context-menu-item" id="searchCut">Cut</div>
+  <div class="context-menu-item" id="searchCopy">Copy</div>
+  <div class="context-menu-item" id="searchPaste">Paste</div>
+  <div class="context-menu-divider"></div>
+  <div class="context-menu-item" id="searchSelectAll">Select All</div>
+  <div class="context-menu-item" id="searchClear">Clear</div>
+</div>
+
+<div class="context-menu" id="pageContextMenu">
+  <div class="context-menu-item" id="pageRefresh">Refresh Page</div>
+  <div class="context-menu-item" id="pageNewTab">Open in New Tab</div>
+  <div class="context-menu-divider"></div>
+  <div class="context-menu-item" id="pageCopyUrl">Copy Page URL</div>
+</div>
+
+<script>
+const shortcuts = [
+  { label: 'GitHub', icon: '⌨', url: 'https://github.com' },
+  { label: 'YouTube', icon: '▶', url: 'https://youtube.com' },
+  { label: 'Twitch', icon: '◉', url: 'https://twitch.tv' },
+  { label: 'Seelen Profile', icon: '⚙', url: 'https://k-ivy.github.io/Seelen-UI-Resources/' }
+];
+
+const loadShortcuts = () => {
+  try {
+    const saved = localStorage.getItem('startpage-shortcuts');
+    return saved ? JSON.parse(saved) : shortcuts;
+  } catch (e) {
+    return shortcuts;
+  }
+};
+
+const saveShortcuts = (data) => {
+  try {
+    localStorage.setItem('startpage-shortcuts', JSON.stringify(data));
+  } catch (e) {}
+};
+
+let currentShortcuts = loadShortcuts();
+let editingIndex = -1;
+
+const el = {
+  date: document.getElementById('date'),
+  dateNumeric: document.getElementById('dateNumeric'),
+  searchInput: document.getElementById('searchInput'),
+  searchForm: document.getElementById('searchForm'),
+  engineBtns: document.querySelectorAll('.btn-toggle'),
+  shortcuts: document.getElementById('shortcuts'),
+  settingsBtn: document.getElementById('settingsBtn'),
+  settingsModal: document.getElementById('settingsModal'),
+  editShortcutModal: document.getElementById('editShortcutModal'),
+  shortcutList: document.getElementById('shortcutList'),
+  addShortcutBtn: document.getElementById('addShortcutBtn'),
+  editModalTitle: document.getElementById('editModalTitle'),
+  editIcon: document.getElementById('editIcon'),
+  editLabel: document.getElementById('editLabel'),
+  editUrl: document.getElementById('editUrl'),
+  saveShortcutBtn: document.getElementById('saveShortcutBtn'),
+  cancelEditBtn: document.getElementById('cancelEditBtn')
+};
+
+const engines = {
+  google: 'https://www.google.com/search?q=',
+  duckduckgo: 'https://duckduckgo.com/?q=',
+  github: 'https://github.com/search?q='
+};
+
+let activeEngine = 'duckduckgo';
+
+const escapeHtml = (str) => {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+};
+
+const buildShortcuts = () => {
+  el.shortcuts.innerHTML = currentShortcuts.map((s, i) => `
+    <a href="${escapeHtml(s.url)}" class="shortcut" data-url="${escapeHtml(s.url)}">
+      <div class="shortcut-icon">${escapeHtml(s.icon)}</div>
+      <div class="shortcut-label">${escapeHtml(s.label)}</div>
+    </a>
+  `).join('');
+};
+
+const buildShortcutList = () => {
+  el.shortcutList.innerHTML = currentShortcuts.map((s, i) => `
+    <div class="shortcut-item">
+      <div class="shortcut-item-icon">${escapeHtml(s.icon)}</div>
+      <div class="shortcut-item-label">${escapeHtml(s.label)}</div>
+      <div class="shortcut-item-actions">
+        <button class="btn-icon-small edit" data-index="${i}" title="Edit">✎</button>
+        <button class="btn-icon-small delete" data-index="${i}" title="Delete">✕</button>
+      </div>
+    </div>
+  `).join('');
+};
+
+const openModal = (m) => m.classList.add('show');
+const closeModal = (m) => m.classList.remove('show');
+
+const openEditModal = (index = -1) => {
+  editingIndex = index;
+  
+  if (index >= 0) {
+    const shortcut = currentShortcuts[index];
+    el.editModalTitle.textContent = 'Edit Shortcut';
+    el.editIcon.value = shortcut.icon;
+    el.editLabel.value = shortcut.label;
+    el.editUrl.value = shortcut.url;
+  } else {
+    el.editModalTitle.textContent = 'Add Shortcut';
+    el.editIcon.value = '';
+    el.editLabel.value = '';
+    el.editUrl.value = '';
+  }
+  
+  openModal(el.editShortcutModal);
+};
+
+const saveShortcut = () => {
+  const icon = el.editIcon.value.trim();
+  const label = el.editLabel.value.trim();
+  const url = el.editUrl.value.trim();
+  
+  if (!icon || !label || !url) return;
+  
+  const shortcut = { icon, label, url };
+  
+  if (editingIndex >= 0) {
+    currentShortcuts[editingIndex] = shortcut;
+  } else {
+    currentShortcuts.push(shortcut);
+  }
+  
+  saveShortcuts(currentShortcuts);
+  buildShortcuts();
+  buildShortcutList();
+  closeModal(el.editShortcutModal);
+};
+
+const deleteShortcut = (index) => {
+  currentShortcuts.splice(index, 1);
+  saveShortcuts(currentShortcuts);
+  buildShortcuts();
+  buildShortcutList();
+};
+
+const updateDate = () => {
+  const now = new Date();
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  el.date.textContent = now.toLocaleDateString('en-US', options);
+  el.dateNumeric.textContent = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
+};
+
+const isUrl = str => /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/.*)?$/i.test(str) || str.includes('localhost');
+
+el.searchForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const query = el.searchInput.value.trim();
+  if (!query) return;
+  
+  const url = isUrl(query) 
+    ? (query.startsWith('http') ? query : `https://${query}`)
+    : engines[activeEngine] + encodeURIComponent(query);
+  
+  window.location.href = url;
+});
+
+el.engineBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeEngine = btn.dataset.engine;
+    el.engineBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== el.searchInput) {
+    e.preventDefault();
+    el.searchInput.focus();
+  } else if (e.key === 'Escape') {
+    el.searchInput.value = '';
+    el.searchInput.blur();
+    closeModal(el.settingsModal);
+    closeModal(el.editShortcutModal);
+  }
+});
+
+const contextMenu = document.getElementById('contextMenu');
+const searchContextMenu = document.getElementById('searchContextMenu');
+const pageContextMenu = document.getElementById('pageContextMenu');
+let currentShortcut = null;
+let currentEngine = null;
+
+const showContextMenu = (menu, x, y) => {
+  contextMenu.classList.remove('show');
+  searchContextMenu.classList.remove('show');
+  pageContextMenu.classList.remove('show');
+  menu.style.left = `${x}px`;
+  menu.style.top = `${y}px`;
+  menu.classList.add('show');
+};
+
+document.addEventListener('contextmenu', e => {
+  const shortcut = e.target.closest('.shortcut');
+  const engineBtn = e.target.closest('.btn-toggle');
+  const searchInput = e.target.closest('.search-input');
+  
+  if (shortcut) {
+    e.preventDefault();
+    currentShortcut = shortcut;
+    currentEngine = null;
+    showContextMenu(contextMenu, e.pageX, e.pageY);
+  } else if (engineBtn) {
+    e.preventDefault();
+    currentShortcut = null;
+    currentEngine = engineBtn.dataset.engine;
+    showContextMenu(contextMenu, e.pageX, e.pageY);
+  } else if (searchInput) {
+    e.preventDefault();
+    const hasSelection = el.searchInput.selectionStart !== el.searchInput.selectionEnd;
+    const hasValue = el.searchInput.value.length > 0;
+    document.getElementById('searchCut').classList.toggle('disabled', !hasSelection);
+    document.getElementById('searchCopy').classList.toggle('disabled', !hasSelection);
+    document.getElementById('searchSelectAll').classList.toggle('disabled', !hasValue);
+    document.getElementById('searchClear').classList.toggle('disabled', !hasValue);
+    showContextMenu(searchContextMenu, e.pageX, e.pageY);
+  } else {
+    e.preventDefault();
+    showContextMenu(pageContextMenu, e.pageX, e.pageY);
+  }
+});
+
+document.addEventListener('click', () => {
+  contextMenu.classList.remove('show');
+  searchContextMenu.classList.remove('show');
+  pageContextMenu.classList.remove('show');
+});
+
+document.getElementById('contextOpen').addEventListener('click', e => {
+  e.stopPropagation();
+  if (currentShortcut) {
+    window.location.href = currentShortcut.dataset.url;
+  } else if (currentEngine) {
+    window.location.href = engines[currentEngine].split('?')[0];
+  }
+  contextMenu.classList.remove('show');
+});
+
+document.getElementById('contextNewTab').addEventListener('click', e => {
+  e.stopPropagation();
+  if (currentShortcut) {
+    window.open(currentShortcut.dataset.url, '_blank');
+  } else if (currentEngine) {
+    window.open(engines[currentEngine].split('?')[0], '_blank');
+  }
+  contextMenu.classList.remove('show');
+});
+
+document.getElementById('contextCopyLink').addEventListener('click', e => {
+  e.stopPropagation();
+  if (currentShortcut) {
+    navigator.clipboard.writeText(currentShortcut.dataset.url);
+  } else if (currentEngine) {
+    navigator.clipboard.writeText(engines[currentEngine].split('?')[0]);
+  }
+  contextMenu.classList.remove('show');
+});
+
+document.getElementById('searchCut').addEventListener('click', e => {
+  e.stopPropagation();
+  if (!e.target.classList.contains('disabled')) {
+    const start = el.searchInput.selectionStart;
+    const end = el.searchInput.selectionEnd;
+    navigator.clipboard.writeText(el.searchInput.value.substring(start, end));
+    el.searchInput.value = el.searchInput.value.substring(0, start) + el.searchInput.value.substring(end);
+    el.searchInput.setSelectionRange(start, start);
+  }
+  searchContextMenu.classList.remove('show');
+});
+
+document.getElementById('searchCopy').addEventListener('click', e => {
+  e.stopPropagation();
+  if (!e.target.classList.contains('disabled')) {
+    navigator.clipboard.writeText(el.searchInput.value.substring(el.searchInput.selectionStart, el.searchInput.selectionEnd));
+  }
+  searchContextMenu.classList.remove('show');
+});
+
+document.getElementById('searchPaste').addEventListener('click', async e => {
+  e.stopPropagation();
+  try {
+    const text = await navigator.clipboard.readText();
+    const start = el.searchInput.selectionStart;
+    const end = el.searchInput.selectionEnd;
+    el.searchInput.value = el.searchInput.value.substring(0, start) + text + el.searchInput.value.substring(end);
+    el.searchInput.setSelectionRange(start + text.length, start + text.length);
+    el.searchInput.focus();
+  } catch (err) {}
+  searchContextMenu.classList.remove('show');
+});
+
+document.getElementById('searchSelectAll').addEventListener('click', e => {
+  e.stopPropagation();
+  if (!e.target.classList.contains('disabled')) {
+    el.searchInput.select();
+  }
+  searchContextMenu.classList.remove('show');
+});
+
+document.getElementById('searchClear').addEventListener('click', e => {
+  e.stopPropagation();
+  if (!e.target.classList.contains('disabled')) {
+    el.searchInput.value = '';
+    el.searchInput.focus();
+  }
+  searchContextMenu.classList.remove('show');
+});
+
+document.getElementById('pageRefresh').addEventListener('click', e => {
+  e.stopPropagation();
+  window.location.reload();
+  pageContextMenu.classList.remove('show');
+});
+
+document.getElementById('pageNewTab').addEventListener('click', e => {
+  e.stopPropagation();
+  window.open(window.location.href, '_blank');
+  pageContextMenu.classList.remove('show');
+});
+
+document.getElementById('pageCopyUrl').addEventListener('click', e => {
+  e.stopPropagation();
+  navigator.clipboard.writeText(window.location.href);
+  pageContextMenu.classList.remove('show');
+});
+
+el.settingsBtn.addEventListener('click', () => {
+  buildShortcutList();
+  openModal(el.settingsModal);
+});
+
+el.addShortcutBtn.addEventListener('click', () => {
+  openEditModal(-1);
+});
+
+el.saveShortcutBtn.addEventListener('click', saveShortcut);
+
+el.cancelEditBtn.addEventListener('click', () => {
+  closeModal(el.editShortcutModal);
+});
+
+el.shortcutList.addEventListener('click', e => {
+  const editBtn = e.target.closest('.edit');
+  const deleteBtn = e.target.closest('.delete');
+  
+  if (editBtn) {
+    const index = parseInt(editBtn.dataset.index);
+    openEditModal(index);
+  } else if (deleteBtn) {
+    const index = parseInt(deleteBtn.dataset.index);
+    if (confirm('Delete this shortcut?')) {
+      deleteShortcut(index);
+    }
+  }
+});
+
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.addEventListener('click', e => {
+    if (e.target === modal) {
+      closeModal(modal);
+    }
+  });
+});
+
+buildShortcuts();
+updateDate();
+
+el.searchInput.focus();
+</script>
+</body>
+</html>
