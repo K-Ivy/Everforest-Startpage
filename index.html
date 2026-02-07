@@ -180,6 +180,15 @@ body {
   font-weight: 500;
 }
 
+.shortcut.dragging {
+  opacity: 0.4;
+}
+
+.shortcut.drag-over {
+  border-color: var(--accent);
+  background: var(--bg-dark);
+}
+
 .hint {
   text-align: center;
   font-size: 11px;
@@ -802,7 +811,7 @@ const buildShortcuts = () => {
   el.shortcuts.innerHTML = currentShortcuts.map((s, i) => {
     const e = escapeData(s, ['icon', 'label', 'url']);
     return `
-      <a href="${e.url}" class="shortcut" data-url="${e.url}" data-index="${i}">
+      <a href="${e.url}" class="shortcut" data-url="${e.url}" data-index="${i}" draggable="true">
         <div class="shortcut-icon">${e.icon}</div>
         <div class="shortcut-label">${e.label}</div>
       </a>
@@ -1240,6 +1249,50 @@ buildShortcuts();
 rebuildEngineToggles();
 updateDate();
 el.searchInput.focus();
+
+let draggedIndex = null;
+
+el.shortcuts.addEventListener('dragstart', e => {
+  const shortcut = e.target.closest('.shortcut');
+  if (!shortcut) return;
+  draggedIndex = parseInt(shortcut.dataset.index);
+  shortcut.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+});
+
+el.shortcuts.addEventListener('dragend', e => {
+  e.target.closest('.shortcut')?.classList.remove('dragging');
+  el.shortcuts.querySelectorAll('.drag-over').forEach(s => s.classList.remove('drag-over'));
+  draggedIndex = null;
+});
+
+el.shortcuts.addEventListener('dragover', e => {
+  e.preventDefault();
+  const shortcut = e.target.closest('.shortcut');
+  if (!shortcut || draggedIndex === null) return;
+  
+  const targetIndex = parseInt(shortcut.dataset.index);
+  if (targetIndex === draggedIndex) return;
+  
+  el.shortcuts.querySelectorAll('.drag-over').forEach(s => s.classList.remove('drag-over'));
+  shortcut.classList.add('drag-over');
+});
+
+el.shortcuts.addEventListener('drop', e => {
+  e.preventDefault();
+  const shortcut = e.target.closest('.shortcut');
+  if (!shortcut || draggedIndex === null) return;
+  
+  const targetIndex = parseInt(shortcut.dataset.index);
+  if (targetIndex === draggedIndex) return;
+  
+  const [item] = currentShortcuts.splice(draggedIndex, 1);
+  currentShortcuts.splice(targetIndex, 0, item);
+  
+  saveToStorage('startpage-shortcuts', currentShortcuts);
+  buildShortcuts();
+  buildShortcutList();
+});
 </script>
 </body>
 </html>
